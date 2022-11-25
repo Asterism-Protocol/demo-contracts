@@ -41,6 +41,9 @@ contract Initializer {
 
     function send(uint16 _dstChainId, address _destination, bytes calldata _payload) external payable {
         uint64 nonce = ++outboundNonce[_dstChainId][msg.sender];
+        console.log("Sending from address: ", msg.sender);
+        console.log("Sending to chain: ", _dstChainId);
+        console.log("Sending with nonce: ", nonce);
         translatorLibrary.send(msg.sender, nonce, _dstChainId, _destination, _payload);
     }
 
@@ -54,7 +57,7 @@ contract Initializer {
         // block if any message blocking
         StoredPayload storage sp = storedPayload[_srcChainId][_srcPath];
         require(sp.payloadHash == bytes32(0), "in message blocking");
-        console.log("Message recieved!");
+        console.log("Message received!");
         console.log(_dstAddress);
         try InitializerReceiver(_dstAddress).asterismReceive{gas: _gasLimit}(_srcChainId, _srcPath, _nonce, _payload) {
             // success, do nothing, end of the message delivery

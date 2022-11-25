@@ -16,10 +16,14 @@ async function main() {
 
   const Token = await ethers.getContractFactory("MultichainToken");
 
-  const token = await Token.deploy(initializer.address, initializer.address, 1000000*10^18);
+  const token = await Token.deploy(initializer.address, initializer.address, ethers.utils.parseEther("1000000"));
   await token.deployed();
-
   console.log("Token address: :", token.address);
+
+  const Claimer = await ethers.getContractFactory("MultiChainDemo");
+  const claimer = await Claimer.deploy(token.address, token.address);
+  await claimer.deployed();
+  console.log("Claimer address: :", claimer.address);
 }
 
 main().catch((error) => {

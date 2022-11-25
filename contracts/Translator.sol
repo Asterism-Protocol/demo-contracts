@@ -218,7 +218,7 @@ contract Translator {
         endpointContract = _initializerReceiver;
     }
 
-    function send(address _application, uint64, uint16 _dstChainId, address _dstAddress, bytes calldata _payload) external payable onlyEndpoint {
+    function send(address _application, uint64 _nonce, uint16 _dstChainId, address _dstAddress, bytes calldata _payload) external payable onlyEndpoint {
         address application = _application;
         uint16 dstChainId = _dstChainId;
         // TODO: Check if dst chain exists
@@ -226,6 +226,8 @@ contract Translator {
         address dstAddress = _dstAddress;
         bytes memory payload = _payload;
         uint64 nonce = ++outboundNonce[_dstChainId][dstAddress];
+        console.log("Sending to chain: ", _dstChainId);
+        console.log("Nonce during sending: ", nonce);
         // emit the data packet
         // TODO: Revisit local chain id (second parameter)
         bytes memory encodedPayload = abi.encode(nonce, uint16(0), application, dstChainId, dstAddress, payload);
@@ -240,6 +242,9 @@ contract Translator {
         (uint64 nonce, uint16 _sChId, address _a, uint16 dstChainId, address dstAddress, bytes memory payload) = abi.decode(_payload, (uint64, uint16, address, uint16, address, bytes));
 
         console.log("Data from packet was parsed");
+        console.log("Nonce: ", nonce);
+        console.log("Source chain id from payload: ", _sChId);
+        console.log("Source chain id from request: ", _srcChainId);
         // TODO: Check if current chain is destination chain
         // TODO: Check if address from payload == address from relayer
 
@@ -253,6 +258,7 @@ contract Translator {
 
         bytes memory pathData = abi.encodePacked(_a, dstAddress);
         // TODO: Correct nonce check
+        console.log("Current inbound nonce: ", inboundNonce[_sChId][pathData]);
         require(nonce == ++inboundNonce[_sChId][pathData], "wrong nonce");
         emit PacketReceived(_sChId, _a, dstAddress, nonce, keccak256(payload));
         console.log("About to call endpoint");
