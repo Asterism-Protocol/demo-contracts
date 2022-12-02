@@ -24,6 +24,11 @@ async function main() {
   const claimer = await Claimer.deploy(token.address, token.address);
   await claimer.deployed();
   console.log("Claimer address: :", claimer.address);
+
+  const Gas = await ethers.getContractFactory("GasSender");
+  const gas_sender = await Gas.deploy(initializer.address, initializer.address);
+  await gas_sender.deployed();
+  console.log("Gas sender address: :", gas_sender.address);
 }
 
 main().catch((error) => {
