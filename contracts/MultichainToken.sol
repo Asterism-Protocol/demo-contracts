@@ -17,17 +17,17 @@ contract MultichainToken is ERC20 {
         _mint(_msgSender(), _initialSupply);
     }
 
-    function crossChainTransfer(uint16 destChain, address from, address to, uint amount) public {
+    function crossChainTransfer(uint16 destChain, address from, address to, uint amount, address target) public {
         amount = _debitFrom(from, amount); // amount returned should not have dust
         require(amount > 0, "OFTCore: amount too small");
-        _sendMessage(destChain, to, amount);
+        _sendMessage(destChain, to, amount, target);
     }
 
-    function _sendMessage(uint16 destChain, address destAddress, uint amount) internal {
+    function _sendMessage(uint16 destChain, address destAddress, uint amount, address target) internal {
         bytes memory payload = abi.encode(destAddress, amount);
         initializerLib.send(
             destChain,
-            destAddress,
+            target,
             payload
         );
     }

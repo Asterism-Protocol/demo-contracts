@@ -57,7 +57,7 @@ describe("Token contract", function () {
     }
     const { Initializer, initializer, Transalor, translator, Token, token, owner } = await loadFixture(deployContractsFixture);
     await translator.setEndpoint(initializer.address, initializer.address);
-    await expect(token.crossChainTransfer(10, owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100))
+    await expect(token.crossChainTransfer(10, owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100, token.address))
       .to.emit(translator, 'Packet')
   });
   it("Should burn token", async function () {
@@ -68,7 +68,7 @@ describe("Token contract", function () {
     }
     const { Initializer, initializer, Transalor, translator, Token, token, owner } = await loadFixture(deployContractsFixture);
     await translator.setEndpoint(initializer.address, initializer.address);
-    await expect(token.crossChainTransfer(10, owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100))
+    await expect(token.crossChainTransfer(10, owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100, token.address))
       .to.emit(translator, 'Packet');
     expect(await token.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT - 100)
@@ -85,7 +85,7 @@ describe("Token contract", function () {
     }
     const { Initializer, initializer, Transalor, translator, Token, token, owner } = await loadFixture(deployContractsFixture);
     await translator.setEndpoint(initializer.address, initializer.address);
-    await expect(token.crossChainTransfer(10, owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100))
+    await expect(token.crossChainTransfer(10, owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100, token.address))
       .to.emit(translator, 'Packet')
       .withArgs(captureValue)
     expect(await token.balanceOf(owner.address)).to.equal(

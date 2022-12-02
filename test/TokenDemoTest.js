@@ -35,7 +35,7 @@ describe("Token contract", function () {
     }
     const { Initializer, initializer, Transalor, translator, Token, token, Claimer, claimer, owner } = await loadFixture(deployContractsFixture);
     await translator.setEndpoint(initializer.address, initializer.address);
-    await expect(token.crossChainTransfer(10, owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100))
+    await expect(token.crossChainTransfer(10, owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100, token.address))
       .to.emit(translator, 'Packet')
       .withArgs(captureValue)
     expect(await token.balanceOf(owner.address)).to.equal(
@@ -52,7 +52,8 @@ describe("Token contract", function () {
     await token.transfer(claimer.address, await token.balanceOf(owner.address));
     const chainIds = [0,1,2];
     const amounts = [10,20,30];
-    await expect(claimer.claim(chainIds, amounts, 3))
+    const addresses = [token.address]
+    await expect(claimer.claim(chainIds, amounts, addresses, 3))
       .to.emit(translator, 'Packet')
       .withArgs(captureValue);
   });
@@ -65,7 +66,7 @@ describe("Token contract", function () {
     }
     const { Initializer, initializer, Transalor, translator, Token, token, Claimer, claimer, owner } = await loadFixture(deployContractsFixture);
     await translator.setEndpoint(initializer.address, initializer.address);
-    await expect(token.crossChainTransfer(10, owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100))
+    await expect(token.crossChainTransfer(10, owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100, token.address))
       .to.emit(translator, 'Packet')
       .withArgs(captureValue)
     expect(await token.balanceOf(owner.address)).to.equal(
@@ -82,7 +83,8 @@ describe("Token contract", function () {
     await token.transfer(claimer.address, await token.balanceOf(owner.address));
     const chainIds = [0];
     const amounts = [10];
-    await expect(await claimer.claim(chainIds, amounts, 1))
+    const addresses = [token.address];
+    await expect(await claimer.claim(chainIds, amounts, addresses, 1))
       .to.emit(translator, 'Packet')
       .withArgs(captureValue)
     console.log("capturedValue");
