@@ -8,6 +8,7 @@ describe("Token contract", function () {
     const Initializer = await ethers.getContractFactory("Initializer");
     const Transalor = await ethers.getContractFactory("Translator");
     const Token = await ethers.getContractFactory("MultichainToken");
+    const Gas = await ethers.getContractFactory("GasSender");
     const [owner] = await ethers.getSigners();
 
     const translator = await Transalor.deploy();
@@ -18,6 +19,9 @@ describe("Token contract", function () {
 
     const token = await Token.deploy(initializer.address, initializer.address, TOKEN_AMOUNT);
     await token.deployed();
+
+    const gas_sender = await Gas.deploy(initializer.address, initializer.address);
+    await gas_sender.deployed();
 
     // Fixtures can return anything you consider useful for your tests
     return { Initializer, initializer, Transalor, translator, Token, token, owner};
