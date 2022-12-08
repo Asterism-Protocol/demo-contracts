@@ -52,7 +52,7 @@ describe("Token contract", function () {
     await token.transfer(claimer.address, await token.balanceOf(owner.address));
     const chainIds = [0,1,2];
     const amounts = [10,20,30];
-    const addresses = [token.address]
+    const addresses = [token.address, token.address, token.address];
     await expect(claimer.claim(chainIds, amounts, addresses, 3))
       .to.emit(translator, 'Packet')
       .withArgs(captureValue);
@@ -81,7 +81,9 @@ describe("Token contract", function () {
     );
     expect(await token.totalSupply()).to.equal(TOKEN_AMOUNT);
     await token.transfer(claimer.address, await token.balanceOf(owner.address));
-    const chainIds = [0];
+
+
+    const chainIds = [10];
     const amounts = [10];
     const addresses = [token.address];
     await expect(await claimer.claim(chainIds, amounts, addresses, 1))
@@ -89,7 +91,7 @@ describe("Token contract", function () {
       .withArgs(captureValue)
     console.log("capturedValue");
     console.log(capturedValue);
-    await translator.translateMessage(0, token.address, 300000, capturedValue);
+    await translator.translateMessage(1, token.address, 300000, capturedValue);
     expect(await token.totalSupply()).to.equal(TOKEN_AMOUNT);
     expect(await token.balanceOf(owner.address)).to.equal(
       (10)

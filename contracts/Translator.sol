@@ -200,6 +200,16 @@ contract Translator {
 
     mapping(uint16 => mapping(address => uint64)) public outboundNonce;
 
+    struct Chain {
+        string title;
+        bool exists;
+    }
+    mapping(uint16 => Chain) public chainsMap;
+
+    mapping(address => string) public approvedRelayers;
+
+    uint16 localChain;
+
     event Packet(bytes payload);
     event InvalidDst(uint16 indexed srcChainId, address srcAddress, address indexed dstAddress, uint64 nonce, bytes32 payloadHash);
     event PacketReceived(uint16 indexed srcChainId, address srcAddress, address indexed dstAddress, uint64 nonce, bytes32 payloadHash);
@@ -213,25 +223,24 @@ contract Translator {
     constructor(){
     }
 
-    function setEndpoint(address _endpoint, InitializerReceiver _initializerReceiver) public {
-        endpoint = _endpoint;
-        endpointContract = _initializerReceiver;
+    function getChainById(uint16 _chainId) public view returns (string memory){
+        return chainsMap[_chainId].title;
     }
 
     function send(address _application, uint64 _nonce, uint16 _dstChainId, address _dstAddress, bytes calldata _payload) external payable onlyEndpoint {
         address application = _application;
         uint16 dstChainId = _dstChainId;
-        // TODO: Check if dst chain exists
+        // TODO: Unlock for production
+        // require(chainsMap[dstChainId].exists);
 
         address dstAddress = _dstAddress;
         bytes memory payload = _payload;
         uint64 nonce = ++outboundNonce[_dstChainId][dstAddress];
         console.log("Sending to chain: ", _dstChainId);
         console.log("Nonce during sending: ", nonce);
-        // emit the data packet
-        // TODO: Revisit local chain id (second parameter)
-        bytes memory encodedPayload = abi.encode(nonce, uint16(0), application, dstChainId, dstAddress, payload);
+        bytes memory encodedPayload = abi.encode(nonce, localChain, application, dstChainId, dstAddress, payload);
         emit Packet(encodedPayload);
+        console.log("Packet sent");
     }
 
     function translateMessage(uint16 _srcChainId, address _dstAddress, uint _gasLimit, bytes calldata _payload) external {
@@ -247,7 +256,6 @@ contract Translator {
         console.log("Source chain id from request: ", _srcChainId);
         // TODO: Check if current chain is destination chain
         // TODO: Check if address from payload == address from relayer
-
         // TODO: Check for address sizes for the chain
 
         // Check if dst address is a smart contract
@@ -257,8 +265,11 @@ contract Translator {
         }
 
         bytes memory pathData = abi.encodePacked(_a, dstAddress);
+        console.log("_a: ", _a);
+        console.log("dstAddress: ", dstAddress);
         // TODO: Correct nonce check
         console.log("Current inbound nonce: ", inboundNonce[_sChId][pathData]);
+        console.log("Nonce: ", nonce);
         require(nonce == ++inboundNonce[_sChId][pathData], "wrong nonce");
         emit PacketReceived(_sChId, _a, dstAddress, nonce, keccak256(payload));
         console.log("About to call endpoint");
@@ -271,5 +282,26 @@ contract Translator {
             size := extcodesize(addr)
         }
         return size != 0;
+    }
+
+    // Admin only functions
+    // TODO: Add modifiers
+    function setEndpoint(address _endpoint, InitializerReceiver _initializerReceiver) public {
+        endpoint = _endpoint;
+        endpointContract = _initializerReceiver;
+    }
+
+    function setChainById(uint16 _chainId, string memory _title) public {
+        chainsMap[_chainId].title = _title;
+        chainsMap[_chainId].exists = true;
+    }
+
+    function setLocalChain(uint16 _chainId) public {
+        require(chainsMap[_chainId].exists);
+        localChain = _chainId;
+    }
+
+    function setApprovedRelayer(address _relayer, string memory _name) public {
+        approvedRelayers[_relayer] = _name;
     }
 }

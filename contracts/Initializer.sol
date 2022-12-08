@@ -50,6 +50,9 @@ contract Initializer {
     // TODO: Revisit receiveNonReentrant logic
     function receivePayload(uint16 _srcChainId, bytes calldata _srcPath, address _dstAddress, uint64 _nonce, uint _gasLimit, bytes calldata _payload) external {
         // assert and increment the nonce. no message shuffling
+        console.log("Nonce in receiver: ", _nonce);
+        console.log("Current nonce: ", inboundNonce[_srcChainId][_srcPath]);
+        console.log("Current chain: ", _srcChainId);
         require(_nonce == ++inboundNonce[_srcChainId][_srcPath], "wrong nonce");
 
         require(translator == msg.sender, "invalid translator");
@@ -84,9 +87,4 @@ contract Initializer {
         InitializerReceiver(dstAddress).asterismReceive(_srcChainId, _srcPath, nonce, _payload);
         emit PayloadCleared(_srcChainId, _srcPath, nonce, dstAddress);
     }
-
-//    function toBytes(address x) public returns (bytes memory b) {
-//        b = new bytes(20);
-//        for (uint i = 0; i < 20; i++) b[i] = bytes(uint8(uint(x) / (2**(8*(19 - i)))));
-//    }
 }

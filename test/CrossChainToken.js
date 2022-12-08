@@ -3,7 +3,7 @@ const { expect } = require("chai");
 
 const TOKEN_AMOUNT = 1000000*10^18;
 
-describe("Token contract", function () {
+describe("Crosschain token", function () {
   async function deployContractsFixture() {
     const Initializer = await ethers.getContractFactory("Initializer");
     const Transalor = await ethers.getContractFactory("Translator");

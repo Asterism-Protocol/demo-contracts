@@ -1,7 +1,7 @@
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { expect } = require("chai");
 
-describe("Token contract", function () {
+describe("Giant test", function () {
   async function deployContractsFixture() {
     const Initializer = await ethers.getContractFactory("Initializer");
     const Transalor = await ethers.getContractFactory("Translator");
