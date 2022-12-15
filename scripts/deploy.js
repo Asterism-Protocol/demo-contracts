@@ -14,6 +14,8 @@ async function main() {
   console.log("Translator address:", translator.address);
   console.log("Initializer address:", initializer.address);
 
+  await translator.setEndpoint(initializer.address, initializer.address);
+
   const Token = await ethers.getContractFactory("MultichainToken");
 
   const token = await Token.deploy(initializer.address, initializer.address, ethers.utils.parseEther("1000000"));
