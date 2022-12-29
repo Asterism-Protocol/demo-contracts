@@ -197,6 +197,9 @@ contract Translator {
     using Address for address;
     InitializerReceiver public endpointContract;
     address public endpoint;
+    address public relayer;
+    address public deployer;
+    bool lock;
 
     mapping(uint16 => mapping(address => uint64)) public outboundNonce;
 
@@ -221,6 +224,22 @@ contract Translator {
     }
 
     constructor(){
+        deployer = msg.sender;
+    }
+
+    function setRelayer(address _relayer) public {
+        require(msg.sender == deployer);
+        relayer = _relayer;
+        lock = true;
+    }
+
+    function locked() public view returns (bool) {
+        return lock;
+    }
+
+    function unlock() public {
+        require(msg.sender == deployer);
+        lock = false;
     }
 
     function getChainById(uint16 _chainId) public view returns (string memory){
@@ -236,24 +255,28 @@ contract Translator {
         address dstAddress = _dstAddress;
         bytes memory payload = _payload;
         uint64 nonce = ++outboundNonce[_dstChainId][dstAddress];
-        console.log("Sending to chain: ", _dstChainId);
-        console.log("Nonce during sending: ", nonce);
+        //console.log("Sending to chain: ", _dstChainId);
+        //console.log("Nonce during sending: ", nonce);
         bytes memory encodedPayload = abi.encode(nonce, localChain, application, dstChainId, dstAddress, payload);
         emit Packet(encodedPayload);
-        console.log("Packet sent");
+        //console.log("Packet sent");
     }
 
     function translateMessage(uint16 _srcChainId, address _dstAddress, uint _gasLimit, bytes calldata _payload) external {
 
         // TODO: Check for valid relayer
-        console.log("Start translating message");
+        if (lock) {
+            require(msg.sender == relayer, "invalid relayer address");
+        }
+
+        //console.log("Start translating message");
 
         (uint64 nonce, uint16 _sChId, address _a, uint16 dstChainId, address dstAddress, bytes memory payload) = abi.decode(_payload, (uint64, uint16, address, uint16, address, bytes));
 
-        console.log("Data from packet was parsed");
-        console.log("Nonce: ", nonce);
-        console.log("Source chain id from payload: ", _sChId);
-        console.log("Source chain id from request: ", _srcChainId);
+        //console.log("Data from packet was parsed");
+        //console.log("Nonce: ", nonce);
+        //console.log("Source chain id from payload: ", _sChId);
+        //console.log("Source chain id from request: ", _srcChainId);
         // TODO: Check if current chain is destination chain
         // TODO: Check if address from payload == address from relayer
         // TODO: Check for address sizes for the chain
@@ -265,14 +288,14 @@ contract Translator {
         }
 
         bytes memory pathData = abi.encodePacked(_a, dstAddress);
-        console.log("_a: ", _a);
-        console.log("dstAddress: ", dstAddress);
+        //console.log("_a: ", _a);
+        //console.log("dstAddress: ", dstAddress);
         // TODO: Correct nonce check
-        console.log("Current inbound nonce: ", inboundNonce[_sChId][pathData]);
-        console.log("Nonce: ", nonce);
+        //console.log("Current inbound nonce: ", inboundNonce[_sChId][pathData]);
+        //console.log("Nonce: ", nonce);
         require(nonce == ++inboundNonce[_sChId][pathData], "wrong nonce");
         emit PacketReceived(_sChId, _a, dstAddress, nonce, keccak256(payload));
-        console.log("About to call endpoint");
+        //console.log("About to call endpoint");
         endpointContract.receivePayload(_srcChainId, pathData, _dstAddress, nonce, _gasLimit, payload);
     }
 

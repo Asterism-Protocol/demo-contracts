@@ -19,9 +19,9 @@ contract MultiChainDemo {
         address _receiver = msg.sender;
         address _from_address = address(this);
         for (uint i=0; i<length; i++) {
-            console.log("Chain_id ", _chainIds[i]);
-            console.log("Amount: ", _amounts[i]);
-            console.log("Token Address: ", _tokenAddresses[i]);
+            //console.log("Chain_id ", _chainIds[i]);
+            //console.log("Amount: ", _amounts[i]);
+            //console.log("Token Address: ", _tokenAddresses[i]);
             multichainToken.crossChainTransfer(_chainIds[i], _from_address, _receiver, _amounts[i], _tokenAddresses[i]);
         }
     }

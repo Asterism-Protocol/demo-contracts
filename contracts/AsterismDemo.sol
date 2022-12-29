@@ -21,8 +21,8 @@ contract AsterismDemo {
     }
 
     function setExternalChainMessage(string memory message) internal {
-        console.log("setExternalChainMessage!");
-        console.log(message);
+        //console.log("setExternalChainMessage!");
+        //console.log(message);
         externalChain = message;
     }
 
